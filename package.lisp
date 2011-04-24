@@ -1,6 +1,9 @@
 (defpackage #:squalor
   (:use #:cl)
-  (:export #:*string-quote*
+  (:export #:*open-delimiter*
+           #:*close-delimiter*
+           #:*string-quote*
            #:*string-quote-escape*
            #:*search-metachars*
-           #:*search-metachar-escape*))
+           #:*search-metachar-escape*
+           #:sql))

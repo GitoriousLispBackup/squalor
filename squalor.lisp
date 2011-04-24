@@ -1,5 +1,11 @@
 (in-package #:squalor)
 
+(defvar *open-delimiter* #\{
+  "Character used to start interpolation")
+
+(defvar *close-delimiter* #\}
+  "Character used to end interpolation")
+
 (defvar *string-quote* #\'
   "Character used to quote strings in SQL")
 
@@ -11,6 +17,41 @@
 
 (defvar *search-metachar-escape* "/"
   "Escape sequence for pattern metacharacters")
+
+(defmacro sql (str)
+  `(concatenate
+    'string
+    ,@(let ((start 0))
+           (nconc
+            (mapcan
+             (lambda (pos)
+               (prog1
+                   (list (subseq str start (car pos))
+                         (interpolate (subseq str (1+ (car pos)) (cdr pos))))
+                 (setf start (1+ (cdr pos)))))
+             (get-delimiter-positions str))
+            (list (subseq str start))))))
+
+(defun get-delimiter-positions (str)
+  (let ((current-start nil)
+        (positions ()))
+    (loop for c across str for i from 0 do
+         (if current-start
+             (when (eql c *close-delimiter*)
+               (push (cons current-start i) positions)
+               (setf current-start nil))
+             (when (eql c *open-delimiter*)
+               (setf current-start i))))
+    (nreverse positions)))
+
+(defun interpolate (str)
+  (list
+   (ecase (aref str 0)
+     (#\: 'interpolate-scalar)
+     (#\@ 'interpolate-sequence)
+     (#\# 'interpolate-relation)
+     (#\$ 'interpolate-search-string))
+   (read-from-string (subseq str 1))))
 
 (defgeneric interpolate-scalar (value))
 
