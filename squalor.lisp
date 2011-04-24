@@ -18,6 +18,15 @@
 (defvar *search-metachar-escape* "/"
   "Escape sequence for pattern metacharacters")
 
+(defmacro enable-squalor-syntax ()
+  "Enable squalor reader syntax"
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (set-dispatch-macro-character #\# #\q 'squalor-reader)))
+
+(defun squalor-reader (stream c p)
+  (declare (ignore c p))
+  `(sql ,(read stream t nil t)))
+
 (defmacro sql (str)
   `(concatenate
     'string

@@ -6,4 +6,5 @@
            #:*string-quote-escape*
            #:*search-metachars*
            #:*search-metachar-escape*
+           #:enable-squalor-syntax
            #:sql))
